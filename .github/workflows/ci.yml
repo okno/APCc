@@ -1,0 +1,33 @@
+name: Checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Check Python syntax
+        run: python -m py_compile app.py
+      - name: Run isolated unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Check installer syntax and help
+        run: |
+          bash -n install.sh
+          bash install.sh --help
+      - name: Check public source hygiene
+        run: python scripts/check_public.py

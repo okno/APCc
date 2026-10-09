@@ -1,0 +1,39 @@
+# Python and local tooling
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+node_modules/
+.DS_Store
+Thumbs.db
+
+# Private runtime configuration and authentication
+.env
+.env.*
+config.json
+settings.json
+auth.json
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Runtime state, logs, backups, and local screenshots
+*.sqlite3
+*.sqlite3-*
+*.db
+*.jsonl
+*.log
+*.backup-*
+artifacts/
+playwright-report/
+test-results/
+
+# Generated distribution archives
+dist/
+*.tar.gz
+*.zip

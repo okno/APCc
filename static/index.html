@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101719">
+  <title>APCc · APC Control</title>
+  <meta name="description" content="APCc is a local UPS management panel built on Network UPS Tools. Monitor power, manage supported controls, and keep an auditable record.">
+  <link rel="icon" href="/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <section class="login-screen" id="login-screen" aria-labelledby="login-title">
+    <div class="login-art" aria-hidden="true">
+      <div class="art-grid"></div>
+      <div class="login-brand"><img class="brand-logo" src="/logo.svg" width="40" height="40" alt=""><span>APCc<span class="brand-subtitle">APC Control</span></span></div>
+      <div class="art-copy"><span class="eyebrow">LOCAL UPS MANAGEMENT</span><h1>Your power.<br>Your control.</h1><p>Monitor your power. Manage every supported control.<br>On your network, in your browser.</p></div>
+      <div class="ups-illustration"><div class="rack-screw"></div><div class="rack-fan"></div><div class="rack-display"><span>APCc</span><b>Power management</b><i></i></div><div class="rack-slats"></div><div class="rack-screw"></div></div>
+      <span class="art-footer">APCc · BUILT ON NETWORK UPS TOOLS</span>
+    </div>
+    <div class="login-form-wrap"><div class="login-form-inner"><span class="eyebrow">LOCAL ACCESS</span><h2 id="login-title">Welcome back.</h2><p class="muted">Sign in to monitor and manage your UPS.</p>
+      <form id="login-form">
+        <label for="username">Username</label><input id="username" name="username" value="admin" autocomplete="username" required maxlength="128">
+        <label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="512">
+        <p id="login-error" class="form-error" role="alert"></p><button type="submit" class="button primary" id="login-button">Sign in <span aria-hidden="true">→</span></button>
+      </form>
+      <div class="login-note"><span class="lock-icon" aria-hidden="true">▣</span> A direct connection to your management server.<br>No cloud service required.</div>
+    </div></div>
+  </section>
+
+  <div class="app-shell" id="app-shell" hidden>
+    <aside class="sidebar">
+      <a class="brand" href="#overview" aria-label="APCc, overview"><img class="brand-logo" src="/logo.svg" width="40" height="40" alt=""><span>APCc<span class="brand-subtitle">APC Control</span></span></a>
+      <div class="workspace-label">YOUR UPS</div>
+      <nav aria-label="Main navigation">
+        <a class="nav-link active" href="#overview"><span class="nav-icon" aria-hidden="true">▦</span> Overview <span class="nav-dot"></span></a>
+        <a class="nav-link" href="#controls"><span class="nav-icon" aria-hidden="true">⌘</span> UPS controls</a>
+        <a class="nav-link" href="#parameters"><span class="nav-icon" aria-hidden="true">☷</span> Parameters</a>
+        <a class="nav-link" href="#consumption"><span class="nav-icon" aria-hidden="true">ϟ</span> Outlet power</a>
+        <a class="nav-link" href="#configuration"><span class="nav-icon" aria-hidden="true">⚙</span> Configuration</a>
+        <a class="nav-link" href="#activity"><span class="nav-icon" aria-hidden="true">◷</span> Activity</a>
+      </nav>
+      <div class="sidebar-bottom"><div class="local-badge"><span class="tiny-dot"></span> Local management</div><p><b id="sidebar-device-name">UPS</b><br><span>Network UPS Tools</span></p><div class="user-block"><span class="avatar" aria-hidden="true">A</span><div><b id="current-user">Administrator</b><small>Administration</small></div><button id="logout-button" class="icon-button" title="Sign out" aria-label="Sign out">↪</button></div></div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar"><div class="breadcrumbs">Your UPS <span>/</span> <b id="breadcrumb-device-name">Overview</b></div><div class="topbar-right"><span class="connection-pill" id="connection-pill"><span class="tiny-dot"></span><span id="connection-text">Connecting…</span></span><button class="button subtle small" id="refresh-button"><span aria-hidden="true">↻</span> Refresh</button></div></header>
+      <div class="page-content">
+        <section id="overview" class="overview-section" aria-labelledby="page-title">
+          <div class="page-heading"><div><div class="eyebrow">STATUS & CONTROLS</div><h1 id="page-title"><span id="page-device-name">Your UPS</span><span class="heading-dot">.</span></h1><p class="muted">Power, battery health, and settings in one place.</p></div><div class="device-tag"><span class="device-icon" aria-hidden="true">▤</span><div><b id="device-model">UPS</b><span id="device-serial">Loading device…</span></div></div></div>
+          <div id="status-error" class="status-error" role="alert" hidden></div>
+          <div class="metrics-grid">
+            <article class="metric-card"><div class="metric-label">POWER SOURCE<span class="metric-icon" aria-hidden="true">ϟ</span></div><div class="metric-value status-value" id="power-status">—</div><div class="metric-foot"><span class="tiny-dot" id="power-dot"></span><span id="power-detail">Waiting for data</span></div></article>
+            <article class="metric-card"><div class="metric-label">BATTERY CHARGE<span class="metric-icon" aria-hidden="true">▰</span></div><div class="metric-value"><span id="battery-charge">—</span><span class="metric-unit">%</span></div><progress id="battery-progress" max="100" value="0" aria-label="Battery charge"></progress><div class="metric-foot" id="battery-detail">Battery information</div></article>
+            <article class="metric-card"><div class="metric-label">BATTERY VOLTAGE<span class="metric-icon" aria-hidden="true">∿</span></div><div class="metric-value"><span id="battery-voltage">—</span><span class="metric-unit">V</span></div><div class="metric-foot" id="battery-nominal">Nominal voltage: —</div></article>
+            <article class="metric-card"><div class="metric-label">REPORTED RUNTIME<span class="metric-icon" aria-hidden="true">◷</span></div><div class="metric-value"><span id="battery-runtime">—</span><span class="metric-unit" id="runtime-unit">min</span></div><div class="metric-foot runtime-note" id="runtime-detail">Estimate reported by the UPS</div></article>
+          </div>
+          <div class="overview-strip"><span><span class="tiny-dot"></span><b id="ups-mode">Waiting for the UPS</b></span><span id="last-updated">Last updated: —</span><span class="auto-refresh" id="polling-label">Refresh every 15 s</span></div>
+        </section>
+
+        <section id="controls" class="section" aria-labelledby="controls-title"><div class="section-heading"><div><h2 id="controls-title">UPS controls</h2><p>Send a supported command to your NUT-connected device.</p></div><span class="section-chip">Available commands</span></div>
+          <div class="control-grid">
+            <article class="panel alarm-panel"><div class="panel-heading"><span class="panel-icon" aria-hidden="true">♪</span><div><h3>Audible alarms</h3><p>Manage the UPS sound alerts.</p></div><span class="small-status" id="beeper-status">—</span></div><div class="beeper-actions" id="beeper-actions"></div><div class="beeper-test"><button type="button" id="beeper-test-button" class="button subtle" disabled aria-describedby="beeper-test-reason">♪ Test UPS indicators & beeper</button><p id="beeper-test-reason">Checking available capabilities.</p></div><details class="legacy-section"><summary>Legacy commands <span>2</span></summary><p>Deprecated aliases retained for NUT compatibility.</p><div id="legacy-actions" class="legacy-actions"></div></details></article>
+            <article class="panel power-panel"><div class="panel-heading"><span class="panel-icon danger-icon" aria-hidden="true">⏻</span><div><h3>Output power</h3><p>Manage power to connected equipment.</p></div></div><div class="power-warning"><span aria-hidden="true">!</span><p>These actions interrupt power to connected equipment. They do not gracefully shut down operating systems.</p></div><div id="power-actions" class="power-actions"></div></article>
+          </div>
+        </section>
+
+        <section id="parameters" class="section" aria-labelledby="parameters-title"><div class="section-heading"><div><h2 id="parameters-title">Operating parameters</h2><p>Settings made available by your UPS driver.</p></div><span class="section-chip">Driver-dependent settings</span></div><div class="panel parameters-panel" id="parameter-fields"></div><p class="section-note">Low-battery thresholds alone do not configure automatic server shutdown. Configure NUT upsmon separately.</p></section>
+
+        <section id="consumption" class="section" aria-labelledby="consumption-title">
+          <div class="section-heading"><div><h2 id="consumption-title">Outlet power</h2><p>Track connected equipment and estimated power use.</p></div><span class="section-chip">Outlet inventory</span></div>
+          <p class="section-explainer">Individual outlet measurements are not available through this panel. Record connected equipment and your own wattage estimates. Power commands affect the whole UPS.</p>
+          <div class="consumption-metrics"><article class="panel consumption-metric"><h3>Measured total power</h3><p><strong id="measured-total">—</strong><span>W</span></p><small id="measured-total-note">Not available</small></article><article class="panel consumption-metric"><h3>Apparent power</h3><p><strong id="apparent-total">—</strong><span>VA</span></p><small>Reported by the UPS, when available</small></article><article class="panel consumption-metric"><h3>UPS load</h3><p><strong id="load-total">—</strong><span>%</span></p><small>Reported by the UPS, when available</small></article><article class="panel consumption-metric estimated-card"><h3>Your estimated total</h3><p><strong id="estimated-total">—</strong><span>W</span></p><small id="estimated-total-note">No saved estimates</small></article></div>
+          <form id="outlets-form" class="panel outlets-panel"><fieldset id="outlets-fields" disabled><legend>Connected equipment</legend><p class="config-group-description">These are logical inventory entries. Map them to your physical outlets yourself; they do not represent independently controllable outlet groups.</p><div id="outlet-rows" class="outlet-rows"></div><div class="config-actions"><button type="submit" id="outlets-save-button" class="button primary">Save equipment & estimates</button></div></fieldset><p id="outlets-feedback" class="form-feedback" role="status" aria-live="polite"></p></form>
+        </section>
+
+        <section id="configuration" class="section" aria-labelledby="configuration-title">
+          <div class="section-heading"><div><h2 id="configuration-title">Configuration</h2><p>Personalize your panel and choose its NUT connection.</p></div><span class="section-chip">Persistent settings</span></div>
+          <form id="config-form" class="panel configuration-panel">
+            <fieldset id="config-fields" disabled>
+              <legend>Your device</legend>
+              <div class="form-grid">
+                <div class="config-field"><label for="config-display-name">Display name</label><input id="config-display-name" name="display_name" required maxlength="100" placeholder="Your UPS"><p>Choose a recognizable name for your UPS.</p></div>
+                <div class="config-field"><label for="config-model">Model label</label><input id="config-model" name="expected_model" required maxlength="100" placeholder="Your UPS model"><p>A display label. The model reported by the UPS appears in device details.</p></div>
+                <div class="config-field"><label for="config-device-ip">Device IP address (optional)</label><input id="config-device-ip" name="device_ip" maxlength="253" placeholder="192.0.2.10" aria-describedby="config-device-ip-help"><p id="config-device-ip-help">An inventory address, such as a management interface. This does not change the UPS network settings or configure USB communication.</p></div>
+                <div class="config-field"><label for="config-serial">Expected serial number</label><input id="config-serial" name="expected_serial" required maxlength="100" placeholder="Serial number reported by your UPS"><p>Identifies the device authorized to receive commands.</p></div>
+              </div>
+              <h3 class="config-group-title">NUT server connection</h3>
+              <p class="config-group-description">Use <code>127.0.0.1</code> when the panel and NUT run on the same computer. For a USB-connected UPS, connect to the computer running NUT.</p>
+              <div class="form-grid">
+                <div class="config-field"><label for="config-host">NUT server IP address</label><input id="config-host" name="nut_host" required maxlength="253" placeholder="127.0.0.1"><p>The private IPv4 or IPv6 address of the computer running NUT.</p></div>
+                <div class="config-field"><label for="config-port">NUT port</label><input id="config-port" name="nut_port" type="number" required min="1" max="65535" step="1" placeholder="3493"><p>The standard port is 3493.</p></div>
+                <div class="config-field"><label for="config-ups">NUT UPS name</label><input id="config-ups" name="ups" required maxlength="100" placeholder="apc"><p>The UPS section name configured in ups.conf.</p></div>
+                <div class="config-field"><label for="config-poll">Automatic refresh (seconds)</label><input id="config-poll" name="poll_interval" type="number" required min="5" max="300" step="1" placeholder="15"><p>Choose an interval from 5 to 300 seconds.</p></div>
+                <div class="config-field"><label for="config-nut-user">NUT username</label><input id="config-nut-user" name="nut_username" required maxlength="100" autocomplete="off"><p>An account authorized to send commands to the NUT server.</p></div>
+                <div class="config-field"><label for="config-nut-password">NUT password</label><input id="config-nut-password" name="nut_password" type="password" maxlength="256" autocomplete="new-password" placeholder="Leave blank to keep the saved password"><p id="nut-password-help">The saved password is never displayed.</p></div>
+              </div>
+              <div class="config-actions"><button type="button" id="config-test-button" class="button subtle">Test connection</button><button type="submit" id="config-save-button" class="button primary">Save configuration</button></div>
+            </fieldset>
+            <p id="config-feedback" class="form-feedback" role="status" aria-live="polite">Loading configuration…</p>
+          </form>
+          <form id="password-form" class="panel password-panel">
+            <fieldset id="password-fields" disabled><legend>Sign-in password</legend><p class="config-group-description">Change the password for <strong id="password-username">admin</strong>. All devices will need to sign in again.</p>
+              <div class="form-grid password-grid"><div class="config-field"><label for="current-password">Current password</label><input id="current-password" name="current_password" type="password" required autocomplete="current-password" maxlength="128"></div><div class="config-field"><label for="new-password">New password</label><input id="new-password" name="new_password" type="password" required autocomplete="new-password" minlength="8" maxlength="128"><p>Use 8 to 128 characters.</p></div><div class="config-field"><label for="repeat-password">Repeat new password</label><input id="repeat-password" name="repeat_password" type="password" required autocomplete="new-password" minlength="8" maxlength="128"></div></div>
+              <div class="config-actions"><button type="submit" id="password-save-button" class="button subtle">Change password</button></div>
+            </fieldset><p id="password-feedback" class="form-feedback" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <div class="bottom-grid">
+          <section class="panel device-panel" aria-labelledby="device-title"><div class="panel-title-row"><h2 id="device-title">Device details</h2><span class="section-chip">NUT</span></div><dl class="device-details"><div><dt>Model label</dt><dd id="detail-model">—</dd></div><div><dt>Reported model</dt><dd id="detail-reported-model">—</dd></div><div><dt>Inventory IP address</dt><dd id="detail-device-ip">—</dd></div><div><dt>Serial number</dt><dd id="detail-serial">—</dd></div><div><dt>UPS firmware</dt><dd id="detail-firmware">—</dd></div><div><dt>Driver</dt><dd id="detail-driver">—</dd></div><div><dt>NUT version</dt><dd id="detail-nut">—</dd></div><div><dt>NUT connection</dt><dd id="detail-endpoint">—</dd></div></dl><div class="firmware-note"><span aria-hidden="true">ⓘ</span><p>Firmware is read-only. Firmware updates are not available through this NUT connection.</p></div></section>
+          <section id="activity" class="panel activity-panel" aria-labelledby="activity-title"><div class="panel-title-row"><h2 id="activity-title">Recent activity</h2><span class="section-chip">Local audit log</span></div><div id="activity-list" class="activity-list"><p class="empty-activity">No activity recorded.</p></div></section>
+        </div>
+        <footer class="page-footer"><span>APCc <span class="footer-divider">/</span> Local UPS management with NUT</span><span>Your network. Your data.</span></footer>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-description"><form id="confirm-form"><div class="dialog-top"><span class="dialog-symbol" id="dialog-symbol" aria-hidden="true">↗</span><button type="button" id="dialog-close" class="icon-button" aria-label="Close dialog">×</button></div><h2 id="confirm-title">Confirm operation</h2><p id="confirm-description"></p><div class="confirmation-detail" id="confirmation-detail"></div><div id="danger-confirmation" hidden><label for="confirmation-input">Type <strong>POWER OFF</strong> to confirm</label><input id="confirmation-input" autocomplete="off" spellcheck="false" placeholder="POWER OFF"><p class="input-help">This command can interrupt services powered by the UPS.</p></div><p id="confirm-error" class="form-error" role="alert"></p><div class="dialog-actions"><button type="button" id="dialog-cancel" class="button subtle">Cancel</button><button type="submit" id="confirm-submit" class="button primary">Confirm</button></div></form></dialog>
+</body>
+</html>
